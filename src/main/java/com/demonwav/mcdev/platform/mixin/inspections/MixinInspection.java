@@ -1,5 +1,7 @@
 package com.demonwav.mcdev.platform.mixin.inspections;
 
+import com.demonwav.mcdev.platform.mixin.MixinConstants;
+
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiAnnotationMemberValue;
 import com.intellij.psi.PsiClass;
@@ -44,7 +46,7 @@ public class MixinInspection extends BaseInspection {
                 if (modifierList == null) {
                     return;
                 }
-                final PsiAnnotation mixin = modifierList.findAnnotation("org.spongepowered.asm.mixin.Mixin");
+                final PsiAnnotation mixin = modifierList.findAnnotation(MixinConstants.MIXIN_ANNOTATION);
                 if (mixin == null) {
                     return;
                 }

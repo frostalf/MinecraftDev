@@ -1,5 +1,6 @@
 package com.demonwav.mcdev.platform.mixin.inspections;
 
+import com.demonwav.mcdev.platform.mixin.MixinConstants;
 import com.demonwav.mcdev.util.McPsiUtil;
 import com.demonwav.mcdev.util.McMethodUtil;
 
@@ -57,7 +58,7 @@ public class ShadowInspection extends BaseInspection {
 
         @Override
         public void visitMethod(PsiMethod method) {
-            final PsiAnnotation shadowAnnotation = method.getModifierList().findAnnotation("org.spongepowered.asm.mixin.Shadow");
+            final PsiAnnotation shadowAnnotation = method.getModifierList().findAnnotation(MixinConstants.SHADOW_ANNOTATION);
             if (shadowAnnotation == null) {
                 return;
             }
@@ -69,7 +70,7 @@ public class ShadowInspection extends BaseInspection {
             if (classModifierList == null) {
                 return;
             }
-            final PsiAnnotation mixinAnnotation = classModifierList.findAnnotation("org.spongepowered.asm.mixin.Mixin");
+            final PsiAnnotation mixinAnnotation = classModifierList.findAnnotation(MixinConstants.MIXIN_ANNOTATION);
             if (mixinAnnotation == null) {
                 return;
             }

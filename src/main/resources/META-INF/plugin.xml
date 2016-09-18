@@ -265,6 +265,13 @@
                          level="WEAK WARNING"
                          hasStaticDescription="true"
                          implementationClass="com.demonwav.mcdev.platform.mixin.inspections.AuthorInspection"/>
+        <localInspection displayName="Illegal Mixin Class Reference"
+                         groupName="Mixin"
+                         language="JAVA"
+                         enabledByDefault="true"
+                         level="ERROR"
+                         hasStaticDescription="true"
+                         implementationClass="com.demonwav.mcdev.platform.mixin.inspections.MixinClassReferenceInspection"/>
 
         <customJavadocTagProvider implementation="com.demonwav.mcdev.platform.mixin.MixinCustomJavaDocTagProvider"/>
 

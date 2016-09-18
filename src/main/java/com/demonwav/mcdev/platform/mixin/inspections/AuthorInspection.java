@@ -1,6 +1,7 @@
 package com.demonwav.mcdev.platform.mixin.inspections;
 
 import com.demonwav.mcdev.platform.MinecraftModule;
+import com.demonwav.mcdev.platform.mixin.MixinConstants;
 import com.demonwav.mcdev.platform.mixin.MixinModuleType;
 
 import com.intellij.codeInspection.ProblemDescriptor;
@@ -148,7 +149,7 @@ public class AuthorInspection extends BaseInspection {
     public static boolean shouldHaveAuthorTag(@NotNull PsiMethod method) {
         PsiModifierList list = method.getModifierList();
 
-        PsiAnnotation annotation = list.findAnnotation("org.spongepowered.asm.mixin.Overwrite");
+        PsiAnnotation annotation = list.findAnnotation(MixinConstants.OVERWRITE_ANNOTATION);
         return annotation != null;
     }
 }
