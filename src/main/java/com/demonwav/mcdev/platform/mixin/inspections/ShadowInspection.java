@@ -1,11 +1,12 @@
 package com.demonwav.mcdev.platform.mixin.inspections;
 
 import com.demonwav.mcdev.platform.mixin.MixinConstants;
-import com.demonwav.mcdev.util.McPsiUtil;
 import com.demonwav.mcdev.util.McMethodUtil;
+import com.demonwav.mcdev.util.McPsiUtil;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.intellij.openapi.util.Pair;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiAnnotationMemberValue;
 import com.intellij.psi.PsiArrayInitializerMemberValue;
@@ -14,13 +15,9 @@ import com.intellij.psi.PsiClassObjectAccessExpression;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiLiteralExpression;
 import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiSubstitutor;
 import com.intellij.psi.PsiType;
-import com.intellij.psi.PsiTypeParameter;
 import com.intellij.psi.impl.source.PsiClassReferenceType;
-import com.intellij.psi.impl.source.PsiImmediateClassType;
-import com.intellij.psi.impl.source.tree.java.PsiClassObjectAccessExpressionImpl;
 import com.intellij.psi.util.TypeConversionUtil;
 import com.siyeh.ig.BaseInspection;
 import com.siyeh.ig.BaseInspectionVisitor;
@@ -31,8 +28,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class ShadowInspection extends BaseInspection {
 
@@ -54,7 +49,7 @@ public class ShadowInspection extends BaseInspection {
         return new ShadowVisitor();
     }
 
-    static class ShadowVisitor extends BaseInspectionVisitor {
+    private static class ShadowVisitor extends BaseInspectionVisitor {
 
         @Override
         public void visitMethod(PsiMethod method) {
@@ -62,26 +57,22 @@ public class ShadowInspection extends BaseInspection {
             if (shadowAnnotation == null) {
                 return;
             }
-            final PsiClass containingClass = method.getContainingClass();
-            if (containingClass == null) {
+            final Pair<PsiClass, PsiAnnotation> pair = MixinUtils.getMixinAnnotation(method);
+            if (pair == null) {
                 return;
             }
-            final PsiModifierList classModifierList = containingClass.getModifierList();
-            if (classModifierList == null) {
-                return;
-            }
-            final PsiAnnotation mixinAnnotation = classModifierList.findAnnotation(MixinConstants.MIXIN_ANNOTATION);
-            if (mixinAnnotation == null) {
-                return;
-            }
+            final PsiAnnotation annotation = pair.getSecond();
+
             // Success, we have a mixin!
-            final PsiAnnotationMemberValue mixinClassValues = mixinAnnotation.findDeclaredAttributeValue("value");
-            final PsiAnnotationMemberValue mixinStringTargets = mixinAnnotation.findDeclaredAttributeValue("targets");
+            final PsiClass containingClass = method.getContainingClass();
+
+            final PsiAnnotationMemberValue mixinClassValues = annotation.findDeclaredAttributeValue("value");
+            final PsiAnnotationMemberValue mixinStringTargets = annotation.findDeclaredAttributeValue("targets");
             if (mixinClassValues == null && mixinStringTargets == null) {
                 return; // we don't have a class this is validated in another area.
             }
 
-            final PsiAnnotationMemberValue mixinTargetRemapValue = mixinAnnotation.findDeclaredAttributeValue("remap");
+            final PsiAnnotationMemberValue mixinTargetRemapValue = annotation.findDeclaredAttributeValue("remap");
             boolean isTargetRemapped = true;
             if (mixinTargetRemapValue instanceof PsiLiteralExpression) {
                 isTargetRemapped = (boolean) ((PsiLiteralExpression) mixinTargetRemapValue).getValue();
@@ -112,7 +103,12 @@ public class ShadowInspection extends BaseInspection {
         enum RemapStrategy {
             BOTH(true, true) {
                 @Override
-                boolean validateMethodCanBeUsedInMixin(@NotNull PsiMethod method, @NotNull PsiClass containingClass, ShadowVisitor visitor, PsiAnnotation shadowAnnotation, @Nullable PsiAnnotationMemberValue mixinTargetClasses, @Nullable PsiAnnotationMemberValue mixinStringTargets) {
+                boolean validateMethodCanBeUsedInMixin(@NotNull PsiMethod method,
+                                                       @NotNull PsiClass containingClass,
+                                                       ShadowVisitor visitor,
+                                                       PsiAnnotation shadowAnnotation,
+                                                       @Nullable PsiAnnotationMemberValue mixinTargetClasses,
+                                                       @Nullable PsiAnnotationMemberValue mixinStringTargets) {
                     if (mixinTargetClasses != null && mixinStringTargets != null) {
                         visitor.registerError(shadowAnnotation, ShadowMemberErrorMessages.Keys.MULTI_TARGET, containingClass);
                         return false;
@@ -133,10 +129,7 @@ public class ShadowInspection extends BaseInspection {
                             return false;
                         }
                         final PsiType type = ((PsiClassObjectAccessExpression) targetExpression).getType();
-                        if (!(type instanceof PsiClassReferenceType)) {
-                            return false;
-                        }
-                        return true;
+                        return type instanceof PsiClassReferenceType;
                     }
                     if (mixinStringTargets instanceof PsiLiteralExpression) {
                         return true;
@@ -308,7 +301,7 @@ public class ShadowInspection extends BaseInspection {
 
     }
 
-    static final class ShadowMemberErrorMessages {
+    private static final class ShadowMemberErrorMessages {
 
         static String formatError(Object... args) {
             if (args.length == 0) {
@@ -385,7 +378,6 @@ public class ShadowInspection extends BaseInspection {
             static final String NO_MATCHING_METHODS_FOUND = "methods-found-but-parameter-mismatch";
             static final String INVALID_ACCESSOR_ON_SHADOW_METHOD = "invalid-method-accessor-modifier-on-shadow";
         }
-
     }
 
     static abstract class ShadowMemberErrorMessageFormatter {

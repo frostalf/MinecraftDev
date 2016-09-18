@@ -2,6 +2,7 @@ package com.demonwav.mcdev.platform.mixin.inspections;
 
 import com.demonwav.mcdev.platform.mixin.MixinConstants;
 
+import com.intellij.openapi.util.Pair;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiAnnotationMemberValue;
 import com.intellij.psi.PsiClass;
@@ -42,18 +43,19 @@ public class MixinInspection extends BaseInspection {
         return new BaseInspectionVisitor() {
             @Override
             public void visitClass(PsiClass aClass) {
-                final PsiModifierList modifierList = aClass.getModifierList();
-                if (modifierList == null) {
+                if (MixinUtils.getMinecraftModule(aClass) == null) {
                     return;
                 }
-                final PsiAnnotation mixin = modifierList.findAnnotation(MixinConstants.MIXIN_ANNOTATION);
-                if (mixin == null) {
+
+                final Pair<PsiClass, PsiAnnotation> pair = MixinUtils.getMixinAnnotation(aClass);
+                if (pair == null) {
                     return;
                 }
-                final PsiAnnotationMemberValue classValues = mixin.findDeclaredAttributeValue("value");
-                final PsiAnnotationMemberValue stringTargets = mixin.findDeclaredAttributeValue("targets");
+
+                final PsiAnnotationMemberValue classValues = pair.getSecond().findDeclaredAttributeValue("value");
+                final PsiAnnotationMemberValue stringTargets = pair.getSecond().findDeclaredAttributeValue("targets");
                 if (classValues == null && stringTargets == null) {
-                    registerError(mixin, aClass);
+                    registerError(pair.getSecond(), aClass);
                 }
             }
         };

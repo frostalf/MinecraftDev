@@ -1,15 +1,9 @@
 package com.demonwav.mcdev.platform.mixin.inspections;
 
-import com.demonwav.mcdev.platform.MinecraftModule;
-import com.demonwav.mcdev.platform.mixin.MixinConstants;
-import com.demonwav.mcdev.platform.mixin.MixinModuleType;
-
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtilCore;
+import com.intellij.openapi.util.Pair;
+import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiTypeElement;
-import com.intellij.psi.util.PsiTypesUtil;
 import com.siyeh.ig.BaseInspection;
 import com.siyeh.ig.BaseInspectionVisitor;
 import org.jetbrains.annotations.Nls;
@@ -42,36 +36,16 @@ public class MixinClassReferenceInspection extends BaseInspection {
         return new BaseInspectionVisitor() {
             @Override
             public void visitTypeElement(PsiTypeElement typeElement) {
-                final Module module = ModuleUtilCore.findModuleForPsiElement(typeElement);
-                if (module == null) {
+                if (MixinUtils.getMinecraftModule(typeElement) == null) {
                     return;
                 }
 
-                final MinecraftModule instance = MinecraftModule.getInstance(module);
-                if (instance == null) {
+                final Pair<PsiClass, PsiAnnotation> pair = MixinUtils.getMixinAnnotation(typeElement);
+                if (pair == null) {
                     return;
                 }
 
-                if (!instance.isOfType(MixinModuleType.getInstance())) {
-                    return;
-                }
-
-                final PsiClass psiClass = PsiTypesUtil.getPsiClass(typeElement.getType());
-                if (psiClass == null) {
-                    return;
-                }
-
-                final PsiModifierList modifierList = psiClass.getModifierList();
-                if (modifierList == null) {
-                    return;
-                }
-
-                // Check if the class that is being referenced is a mixin class
-                if (modifierList.findAnnotation(MixinConstants.MIXIN_ANNOTATION) == null) {
-                    return;
-                }
-
-                registerError(typeElement.getParent(), psiClass.getName());
+                registerError(typeElement.getParent(), pair.getFirst().getName());
             }
         };
     }

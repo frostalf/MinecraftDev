@@ -107,33 +107,29 @@ public class AuthorInspection extends BaseInspection {
         return new BaseInspectionVisitor() {
             @Override
             public void visitMethod(PsiMethod method) {
+                final MinecraftModule instance = MixinUtils.getMinecraftModule(method);
+                if (instance == null) {
+                    return;
+                }
+
+                if (MixinUtils.getMixinAnnotation(method) == null) {
+                    // an @Overwrite is meaningless if it's not in a Mixin class
+                    return;
+                }
+
                 if (!shouldHaveAuthorTag(method)) {
                     return;
                 }
 
-                Module module = ModuleUtilCore.findModuleForPsiElement(method);
-                if (module == null) {
-                    return;
-                }
-
-                MinecraftModule minecraftModule = MinecraftModule.getInstance(module);
-                if (minecraftModule == null) {
-                    return;
-                }
-
-                if (!minecraftModule.isOfType(MixinModuleType.getInstance())) {
-                    return;
-                }
-
-                PsiDocComment docComment = method.getDocComment();
+                final PsiDocComment docComment = method.getDocComment();
                 if (docComment == null) {
                     registerMethodError(method, false, method);
                     return;
                 }
 
-                PsiDocTag[] tags = docComment.getTags();
-                for (PsiDocTag tag : tags) {
-                    String name = tag.getName();
+                final PsiDocTag[] tags = docComment.getTags();
+                for (final PsiDocTag tag : tags) {
+                    final String name = tag.getName();
                     if (!Objects.equals(name, "author")) {
                         continue;
                     }

@@ -12,6 +12,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiJavaCodeReferenceElement;
 import com.intellij.psi.PsiKeyword;
+import com.intellij.psi.PsiMember;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifier;
 import com.intellij.psi.PsiReferenceList;
@@ -23,6 +24,7 @@ import com.intellij.psi.impl.source.PsiImmediateClassType;
 import com.intellij.psi.impl.source.tree.java.PsiClassObjectAccessExpressionImpl;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,24 +34,25 @@ import java.util.Set;
 public final class McPsiUtil {
 
     @Nullable
-    public static PsiClass getClassOfElement(@NotNull PsiElement element) {
+    @Contract("null -> null")
+    public static PsiClass getClassOfElement(@Nullable PsiElement element) {
+        if (element == null) {
+            return null;
+        }
+
         if (element instanceof PsiClass) {
             return (PsiClass) element;
         }
 
-        while (element.getParent() != null) {
-
-            if (element.getParent() instanceof PsiClass) {
-                return (PsiClass) element.getParent();
-            }
-
-            if (element.getParent() instanceof PsiFile || element.getParent() instanceof PsiDirectory) {
-                return null;
-            }
-
-            element = element.getParent();
+        if (element instanceof PsiMember) {
+            return ((PsiMember) element).getContainingClass();
         }
-        return null;
+
+        if (element instanceof PsiFile || element instanceof PsiDirectory) {
+            return null;
+        }
+
+        return getClassOfElement(element.getParent());
     }
 
     @Nullable
