@@ -45,3 +45,4 @@ hs_err_pid*
 .sandbox/
 /src/main/resources/messages.MinecraftDevelopment_en.properties
 /src/main/resources/messages.MinecraftDevelopment.properties
+lib/
