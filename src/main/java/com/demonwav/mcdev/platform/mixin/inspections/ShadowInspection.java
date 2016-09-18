@@ -158,7 +158,12 @@ public class ShadowInspection extends BaseInspection {
                 }
 
                 @Override
-                boolean validateShadowExists(PsiMethod method, PsiClass psiClass, ShadowVisitor visitor, PsiAnnotation shadowAnnotation, @Nullable PsiAnnotationMemberValue targetClasses, @Nullable PsiAnnotationMemberValue stringTargets) {
+                boolean validateShadowExists(PsiMethod method,
+                                             PsiClass psiClass,
+                                             ShadowVisitor visitor,
+                                             PsiAnnotation shadowAnnotation,
+                                             @Nullable PsiAnnotationMemberValue targetClasses,
+                                             @Nullable PsiAnnotationMemberValue stringTargets) {
                     PsiClass targetedMixinClass = McPsiUtil.resolveGenericClass(targetClasses);
                     if (targetedMixinClass != null) {
                         isMethodValidFromClass(method, visitor, shadowAnnotation, targetedMixinClass);
@@ -168,7 +173,12 @@ public class ShadowInspection extends BaseInspection {
             },
             CLASS_NOT_SHADOW_TRUE(false, true) { // Shadows are not remapped if the target is not remapped.
                 @Override
-                boolean validateMethodCanBeUsedInMixin(@NotNull PsiMethod method, @NotNull PsiClass containingClass, ShadowVisitor visitor, PsiAnnotation shadowAnnotation, @Nullable PsiAnnotationMemberValue mixinTargetClasses, @Nullable PsiAnnotationMemberValue mixinStringTargets) {
+                boolean validateMethodCanBeUsedInMixin(@NotNull PsiMethod method,
+                                                       @NotNull PsiClass containingClass,
+                                                       ShadowVisitor visitor,
+                                                       PsiAnnotation shadowAnnotation,
+                                                       @Nullable PsiAnnotationMemberValue mixinTargetClasses,
+                                                       @Nullable PsiAnnotationMemberValue mixinStringTargets) {
                     return true; // Basically, we won't shadowing a method that is provided by the implementation,
                     // but rather a different thing that is adding the method. Minimal validation can be performed
                     // at this point since there are multiple ways one can add methods, even with a different transformation
@@ -176,14 +186,24 @@ public class ShadowInspection extends BaseInspection {
                 }
 
                 @Override
-                boolean validateShadowExists(PsiMethod method, PsiClass psiClass, ShadowVisitor visitor, PsiAnnotation shadowAnnotation, @Nullable PsiAnnotationMemberValue targetClasses, @Nullable PsiAnnotationMemberValue stringTargets) {
+                boolean validateShadowExists(PsiMethod method,
+                                             PsiClass psiClass,
+                                             ShadowVisitor visitor,
+                                             PsiAnnotation shadowAnnotation,
+                                             @Nullable PsiAnnotationMemberValue targetClasses,
+                                             @Nullable PsiAnnotationMemberValue stringTargets) {
                     return false;
                 }
             },
             CLASS_REMAPPED_SHADOW_NOT(true, false) {
 
                 @Override
-                boolean validateMethodCanBeUsedInMixin(@NotNull PsiMethod method, @NotNull PsiClass containingClass, ShadowVisitor visitor, PsiAnnotation shadowAnnotation, @Nullable PsiAnnotationMemberValue mixinTargetClasses, @Nullable PsiAnnotationMemberValue mixinStringTargets) {
+                boolean validateMethodCanBeUsedInMixin(@NotNull PsiMethod method,
+                                                       @NotNull PsiClass containingClass,
+                                                       ShadowVisitor visitor,
+                                                       PsiAnnotation shadowAnnotation,
+                                                       @Nullable PsiAnnotationMemberValue mixinTargetClasses,
+                                                       @Nullable PsiAnnotationMemberValue mixinStringTargets) {
                     return true; // Basically, we won't shadowing a method that is provided by the implementation,
                     // but rather a different thing that is adding the method. Minimal validation can be performed
                     // at this point since there are multiple ways one can add methods, even with a different transformation
@@ -191,13 +211,23 @@ public class ShadowInspection extends BaseInspection {
                 }
 
                 @Override
-                boolean validateShadowExists(PsiMethod method, PsiClass psiClass, ShadowVisitor visitor, PsiAnnotation shadowAnnotation, @Nullable PsiAnnotationMemberValue targetClasses, @Nullable PsiAnnotationMemberValue stringTargets) {
+                boolean validateShadowExists(PsiMethod method,
+                                             PsiClass psiClass,
+                                             ShadowVisitor visitor,
+                                             PsiAnnotation shadowAnnotation,
+                                             @Nullable PsiAnnotationMemberValue targetClasses,
+                                             @Nullable PsiAnnotationMemberValue stringTargets) {
                     return false;
                 }
             },
             NONE(false, false) { // Both are not remapped, no real
                 @Override
-                boolean validateMethodCanBeUsedInMixin(@NotNull PsiMethod method, @NotNull PsiClass containingClass, ShadowVisitor visitor, PsiAnnotation shadowAnnotation, @Nullable PsiAnnotationMemberValue mixinTargetClasses, @Nullable PsiAnnotationMemberValue mixinStringTargets) {
+                boolean validateMethodCanBeUsedInMixin(@NotNull PsiMethod method,
+                                                       @NotNull PsiClass containingClass,
+                                                       ShadowVisitor visitor,
+                                                       PsiAnnotation shadowAnnotation,
+                                                       @Nullable PsiAnnotationMemberValue mixinTargetClasses,
+                                                       @Nullable PsiAnnotationMemberValue mixinStringTargets) {
                     return true; // Basically, we won't shadowing a method that is provided by the implementation,
                     // but rather a different thing that is adding the method. Minimal validation can be performed
                     // at this point since there are multiple ways one can add methods, even with a different transformation
@@ -205,13 +235,20 @@ public class ShadowInspection extends BaseInspection {
                 }
 
                 @Override
-                boolean validateShadowExists(PsiMethod method, PsiClass psiClass, ShadowVisitor visitor, PsiAnnotation shadowAnnotation, @Nullable PsiAnnotationMemberValue targetClasses, @Nullable PsiAnnotationMemberValue stringTargets) {
+                boolean validateShadowExists(PsiMethod method,
+                                             PsiClass psiClass,
+                                             ShadowVisitor visitor,
+                                             PsiAnnotation shadowAnnotation,
+                                             @Nullable PsiAnnotationMemberValue targetClasses,
+                                             @Nullable PsiAnnotationMemberValue stringTargets) {
                     return false;
                 }
-            },
-            ;
+            };
 
-            private static boolean isMethodValidFromClass(PsiMethod method, ShadowVisitor visitor, PsiAnnotation shadowAnnotation, PsiClass targetClass) {
+            private static boolean isMethodValidFromClass(PsiMethod method,
+                                                          ShadowVisitor visitor,
+                                                          PsiAnnotation shadowAnnotation,
+                                                          PsiClass targetClass) {
                 if (targetClass == null) {
                     return true;
                 }
@@ -219,7 +256,19 @@ public class ShadowInspection extends BaseInspection {
                 if (shadowPrefixValue != null && !(shadowPrefixValue instanceof PsiLiteralExpression)) {
                     return true;
                 }
-                final String shadowPrefix = shadowPrefixValue == null ? "shadow$" : ((PsiLiteralExpression) shadowPrefixValue).getValue().toString();
+
+                // Handle prefix, which is of course filled with nullability
+                String shadowPrefix;
+                if (shadowPrefixValue == null) {
+                    shadowPrefix = "shadow$";
+                } else {
+                    final Object value = ((PsiLiteralExpression) shadowPrefixValue).getValue();
+                    if (value == null) {
+                        return false;
+                    }
+                    shadowPrefix = value.toString();
+                }
+
                 String shadowTargetMethodName = method.getName().replace(shadowPrefix, "");
                 final PsiMethod[] methodsByName = targetClass.findMethodsByName(shadowTargetMethodName, false);
                 if (methodsByName.length == 0) {
@@ -236,21 +285,34 @@ public class ShadowInspection extends BaseInspection {
                 }
                 List<PsiMethod> validSignatureMethods = new ArrayList<>(methodsByName.length);
                 for (PsiMethod psiMethod : methodsByName) {
-                    if (McMethodUtil.areSignaturesEqualLightweight(psiMethod.getSignature(PsiSubstitutor.EMPTY), method.getSignature(PsiSubstitutor.EMPTY), shadowTargetMethodName)) {
+                    if (McMethodUtil.areSignaturesEqualLightweight(
+                            psiMethod.getSignature(PsiSubstitutor.EMPTY),
+                            method.getSignature(PsiSubstitutor.EMPTY),
+                            shadowTargetMethodName
+                    )) {
                         // Don't worry about the nullable because it's not a constructor.
                         final PsiType returnType = method.getReturnType();
                         final PsiType possibleReturnType = psiMethod.getReturnType();
                         final PsiType erasedReturnType = TypeConversionUtil.erasure(returnType);
                         final PsiType erasedPossibleReturnType = TypeConversionUtil.erasure(possibleReturnType);
-                        final boolean areTypesAgreed = TypeConversionUtil.typesAgree(returnType, possibleReturnType, true);
 
-                        if (erasedReturnType.equals(erasedPossibleReturnType)) {
-                            validSignatureMethods.add(psiMethod);
+                        if (returnType != null && possibleReturnType != null && erasedReturnType != null) {
+                            final boolean areTypesAgreed = TypeConversionUtil.typesAgree(returnType, possibleReturnType, true);
+
+                            if (erasedReturnType.equals(erasedPossibleReturnType)) {
+                                validSignatureMethods.add(psiMethod);
+                            }
                         }
                     }
                 }
                 if (validSignatureMethods.isEmpty()) {
-                    visitor.registerError(method, ShadowMemberErrorMessages.Keys.NO_MATCHING_METHODS_FOUND, method.getSignature(PsiSubstitutor.EMPTY).getName(), targetClass.getName(), methodsByName);
+                    visitor.registerError(
+                            method,
+                            ShadowMemberErrorMessages.Keys.NO_MATCHING_METHODS_FOUND,
+                            method.getSignature(PsiSubstitutor.EMPTY).getName(),
+                            targetClass.getName(),
+                            methodsByName
+                    );
                     return true;
                 }
 
@@ -262,7 +324,12 @@ public class ShadowInspection extends BaseInspection {
                 if (validAccessMethods.isEmpty()) {
                     final PsiMethod psiMethod = validSignatureMethods.get(0);
                     final String probableAccessModifier = McPsiUtil.getMethodAccessModifier(psiMethod);
-                    visitor.registerError(method, ShadowMemberErrorMessages.Keys.INVALID_ACCESSOR_ON_SHADOW_METHOD, methodAccessModifier, probableAccessModifier);
+                    visitor.registerError(
+                            method,
+                            ShadowMemberErrorMessages.Keys.INVALID_ACCESSOR_ON_SHADOW_METHOD,
+                            methodAccessModifier,
+                            probableAccessModifier
+                    );
                     return true;
                 }
                 return false;
@@ -284,6 +351,7 @@ public class ShadowInspection extends BaseInspection {
                 }
                 return BOTH;
             }
+
             abstract boolean validateShadowExists(PsiMethod method,
                                                   PsiClass psiClass,
                                                   ShadowVisitor visitor,
