@@ -11,6 +11,7 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiIdentifier;
 import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.PsiTypeElement;
@@ -69,7 +70,12 @@ public final class MixinUtils {
             return null;
         }
 
-        return new Pair<>(psiClass, modifierList.findAnnotation(MixinConstants.MIXIN_ANNOTATION));
+        final PsiAnnotation annotation = modifierList.findAnnotation(MixinConstants.MIXIN_ANNOTATION);
+        if (annotation == null) {
+            return null;
+        } else {
+            return new Pair<>(psiClass, annotation);
+        }
     }
 
     /**
@@ -114,7 +120,7 @@ public final class MixinUtils {
      */
     @Nullable
     @Contract(value = "null -> null", pure = true)
-    public static Pair<PsiClass, PsiAnnotation> getMixinAnnotation(@Nullable final PsiElement element) {
+    public static Pair<PsiClass, PsiAnnotation> getContainingMixinAnnotation(@Nullable final PsiElement element) {
         if (element == null) {
             return null;
         }

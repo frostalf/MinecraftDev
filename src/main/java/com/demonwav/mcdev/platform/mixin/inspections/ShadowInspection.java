@@ -57,7 +57,7 @@ public class ShadowInspection extends BaseInspection {
             if (shadowAnnotation == null) {
                 return;
             }
-            final Pair<PsiClass, PsiAnnotation> pair = MixinUtils.getMixinAnnotation(method);
+            final Pair<PsiClass, PsiAnnotation> pair = MixinUtils.getContainingMixinAnnotation(method);
             if (pair == null) {
                 return;
             }

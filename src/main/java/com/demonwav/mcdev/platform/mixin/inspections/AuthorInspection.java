@@ -2,18 +2,13 @@ package com.demonwav.mcdev.platform.mixin.inspections;
 
 import com.demonwav.mcdev.platform.MinecraftModule;
 import com.demonwav.mcdev.platform.mixin.MixinConstants;
-import com.demonwav.mcdev.platform.mixin.MixinModuleType;
 
 import com.intellij.codeInspection.ProblemDescriptor;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifierList;
-import com.intellij.psi.javadoc.JavadocManager;
-import com.intellij.psi.javadoc.JavadocTagInfo;
 import com.intellij.psi.javadoc.PsiDocComment;
 import com.intellij.psi.javadoc.PsiDocTag;
 import com.siyeh.ig.BaseInspection;
@@ -112,7 +107,7 @@ public class AuthorInspection extends BaseInspection {
                     return;
                 }
 
-                if (MixinUtils.getMixinAnnotation(method) == null) {
+                if (MixinUtils.getContainingMixinAnnotation(method) == null) {
                     // an @Overwrite is meaningless if it's not in a Mixin class
                     return;
                 }
