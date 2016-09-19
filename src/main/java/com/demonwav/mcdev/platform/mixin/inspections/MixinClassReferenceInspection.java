@@ -58,8 +58,8 @@ public class MixinClassReferenceInspection extends BaseInspection {
 
                 // Mixin classes can extend Mixin classes
                 if (
-                        reference.getNode().getTreeParent().findChildByType(JavaTokenType.EXTENDS_KEYWORD) != null ||
-                        reference.getNode().getTreeParent().findChildByType(JavaTokenType.IMPLEMENTS_KEYWORD) != null
+                    reference.getNode().getTreeParent().findChildByType(JavaTokenType.EXTENDS_KEYWORD) != null ||
+                    reference.getNode().getTreeParent().findChildByType(JavaTokenType.IMPLEMENTS_KEYWORD) != null
                 ) {
                     // Make sure the class that is doing the extending is also a Mixin class
                     if (MixinUtils.getContainingMixinAnnotation(reference) != null) {
