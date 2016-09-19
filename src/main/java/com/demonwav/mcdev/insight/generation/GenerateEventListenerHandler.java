@@ -183,7 +183,7 @@ public class GenerateEventListenerHandler extends GenerateMembersHandlerBase {
 
     @Override
     public boolean isAvailableForQuickList(@NotNull Editor editor, @NotNull PsiFile file, @NotNull DataContext dataContext) {
-        Module module = ModuleUtilCore.findModuleForPsiElement(file);
+        final Module module = ModuleUtilCore.findModuleForPsiElement(file);
         if (module == null) {
             return false;
         }

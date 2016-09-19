@@ -225,6 +225,13 @@
             <add-to-group group-id="GenerateGroup" anchor="last"/>
         </action>
 
+        <action class="com.demonwav.mcdev.platform.mixin.actions.CreateShadowAction"
+                id="CreateShadow"
+                text="Create Shadow"
+                description="Creates a shadow of a field in a Mixed class.">
+            <add-to-group group-id="GenerateGroup" anchor="last"/>
+        </action>
+
         <group id="MinecraftDevToolsGroup" popup="true" text="Minecraft Development">
             <add-to-group group-id="ToolsMenu"/>
         </group>
